@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 import pyautogui as pyg
 import shutil
 
-file_name="Pause_detector.svm"
+file_name="models/Pause_detector.svm"
 pause_detector = dlib.fhog_object_detector(file_name)
-scrolling_detector=dlib.fhog_object_detector("Scrolling_up.svm")
-scrolling_tabs_detector=dlib.fhog_object_detector("Scrolling_tabs.svm")
-change_program=dlib.fhog_object_detector("change_programe.svm")
+scrolling_detector=dlib.fhog_object_detector("models/Scrolling_up.svm")
+scrolling_tabs_detector=dlib.fhog_object_detector("models/Scrolling_tabs.svm")
+change_program=dlib.fhog_object_detector("models/change_programe.svm")
 detectors=[pause_detector,scrolling_detector,scrolling_tabs_detector,change_program]
 names = ['Pause Detected', 'Scrolling Detected','Scrolling TABS','Change programme']
 

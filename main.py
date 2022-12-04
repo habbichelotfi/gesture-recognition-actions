@@ -10,12 +10,12 @@ GESTURE_NAME = ["A", "C", "D", "E", "F", "G", "h", "K", "L", "N", "P", "AQ", "S"
 
 
 def predict_image(image,model):
-    image=np.array(image,dtype='float32')
-    pred_arr=model.predict(image)
+    image = np.array(image,dtype='float32')
+    pred_arr = model.predict(image)
 
     print(pred_arr)
-    result =GESTURE_NAME[int(np.argmax(pred_arr))]
-
+    result = GESTURE_NAME[int(np.argmax(pred_arr))]
+ 
     score = float("%0.2f" % (max(pred_arr[0]) * 100))
     print(f'Result: {result}, Score: {score}')
     return result, score
