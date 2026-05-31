@@ -45,17 +45,40 @@ SVM_ADJUST_THRESHOLD: float = 0.0
 
 # ==================== CNN Model Settings ====================
 CNN_MODEL_PATH = str(MODELS_DIR / "gesture_cnn_model.h5")
-CNN_GESTURE_NAMES: List[str] = [
-    "A", "C", "D", "E", "F", "G", "H", "K", "L", "N", "P", "Q", "S", "U", "V", "W", "Z"
-]
-CNN_NUM_CLASSES = len(CNN_GESTURE_NAMES)  # 17 gestures
+
+# 4 gesture classes — index order MUST match the dataset folder order
+CNN_GESTURE_NAMES: List[str] = ["A", "C", "D", "E"]
+CNN_NUM_CLASSES = len(CNN_GESTURE_NAMES)   # 4
 
 # CNN Training parameters
 CNN_IMAGE_SIZE: tuple = (300, 300)
 CNN_BATCH_SIZE: int = 32
 CNN_EPOCHS: int = 20
-CNN_VALIDATION_SPLIT: float = 0.3
+CNN_VALIDATION_SPLIT: float = 0.2
 CNN_RANDOM_STATE: int = 42
+
+# ── Gesture → Action mapping (CNN only) ──────────────────────────────────────
+# Format: gesture_name → (action_type, *params)
+#   "press"  : pyautogui.press(key)
+#   "scroll" : pyautogui.scroll(amount)   positive=up, negative=down
+#   "hotkey" : pyautogui.hotkey(*keys)
+CNN_GESTURE_ACTIONS: Dict[str, tuple] = {
+    "A": ("press",  "space"),            # Pause / Play
+    "C": ("scroll",  7),                 # Scroll up
+    "D": ("scroll", -7),                 # Scroll down
+    "E": ("hotkey", "alt", "tab"),       # Switch program
+}
+
+# Label shown on-screen for each gesture
+CNN_GESTURE_LABELS: Dict[str, str] = {
+    "A": "A  →  Pause / Play",
+    "C": "C  →  Scroll Up",
+    "D": "D  →  Scroll Down",
+    "E": "E  →  Switch Program",
+}
+
+# Minimum confidence to accept a CNN prediction and trigger an action
+CNN_CONFIDENCE_THRESHOLD: float = 0.90
 
 # ==================== Hand Segmentation Settings ====================
 ROI_TOP: int = 10

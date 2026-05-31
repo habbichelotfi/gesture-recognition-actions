@@ -26,7 +26,7 @@ logger = setup_logging()
 class GestureRecognitionCNN:
     """CNN model for gesture recognition."""
 
-    def __init__(self, num_classes: int = 17, image_size: Tuple[int, int] = (300, 300)):
+    def __init__(self, num_classes: int = 4, image_size: Tuple[int, int] = (300, 300)):
         """
         Initialize gesture recognition CNN.
 
@@ -88,19 +88,19 @@ class GestureRecognitionCNN:
     def load_images_from_directory(self, dataset_path: str) -> Tuple[np.ndarray, np.ndarray]:
         """
         Load images and labels from directory structure.
+        Expects: dataset_path/GESTURE_NAME/*.jpg  (e.g. datasets/Below_CAM/A/*.jpg)
 
         Args:
-            dataset_path: Path to dataset directory
+            dataset_path: Root path containing one sub-folder per gesture class.
 
         Returns:
-            Tuple of (X, y) where X is images and y is labels
+            Tuple of (X, y) — images array and integer labels array.
         """
         if not Path(dataset_path).exists():
             logger.error(f"Dataset path not found: {dataset_path}")
             raise FileNotFoundError(f"Dataset path not found: {dataset_path}")
 
-        X = []
-        y = []
+        X, y = [], []
 
         for gesture_idx, gesture_name in enumerate(config.CNN_GESTURE_NAMES):
             gesture_dir = Path(dataset_path) / gesture_name
@@ -110,19 +110,14 @@ class GestureRecognitionCNN:
                 continue
 
             image_count = 0
-            for image_file in gesture_dir.glob("*.jpg"):
+            for image_file in sorted(gesture_dir.glob("*.jpg")):
                 try:
-                    img = cv2.imread(str(image_file))
+                    img = cv2.imread(str(image_file), cv2.IMREAD_GRAYSCALE)
                     if img is None:
                         logger.warning(f"Failed to load image: {image_file}")
                         continue
 
-                    # Convert to grayscale
-                    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-                    # Resize to standard size
-                    img = cv2.resize(img, self.image_size)
-
+                    img = cv2.resize(img, self.image_size, interpolation=cv2.INTER_AREA)
                     X.append(img)
                     y.append(gesture_idx)
                     image_count += 1
@@ -131,18 +126,18 @@ class GestureRecognitionCNN:
                     logger.error(f"Error processing image {image_file}: {str(e)}")
                     continue
 
-            logger.info(f"Loaded {image_count} images for gesture '{gesture_name}'")
+            logger.info(f"  [{gesture_idx}] '{gesture_name}' — {image_count} images loaded")
 
         if not X:
             raise ValueError("No images loaded from dataset")
 
         X = np.array(X, dtype="uint8")
-        X = np.expand_dims(X, axis=3)  # Add channel dimension
+        X = np.expand_dims(X, axis=3)   # (N, H, W) → (N, H, W, 1)
         y = np.array(y)
 
-        logger.info(f"Total images loaded: {len(X)}")
-        logger.info(f"Total labels loaded: {len(y)}")
-        logger.info(f"Input shape: {X.shape}")
+        logger.info(f"Total images : {len(X)}")
+        logger.info(f"Input shape  : {X.shape}")
+        logger.info(f"Classes      : {dict(zip(*np.unique(y, return_counts=True)))}")
 
         return X, y
 
